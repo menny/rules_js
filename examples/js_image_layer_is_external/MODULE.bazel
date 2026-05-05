@@ -1,0 +1,35 @@
+"""
+Reproduction for https://github.com/aspect-build/rules_js/issues/2824
+
+The js_image_layer target lives inside child_workspace (see child/BUILD.bazel).
+When it is built from THIS outer workspace (`bazel build @child_workspace//:layer`),
+files owned by child_workspace get f.owner.repo_name == "child_workspace" (non-empty),
+which causes is_external=true in js_image_layer.
+
+Locally the build succeeds because sandbox symlinks resolve correctly.
+On remote execution the symlinks at bazel-out/.../bin/external/child_workspace/node_modules/...
+do not exist, and tar fails with ENOENT.
+"""
+
+module(name = "js_image_layer_is_external_repro")
+
+bazel_dep(name = "aspect_rules_js", version = "0.0.0")
+local_path_override(
+    module_name = "aspect_rules_js",
+    path = "../..",
+)
+
+# Child workspace: contains the js_binary + js_image_layer targets.
+# Files from this module have f.owner.repo_name == "child_workspace" → is_external=true.
+bazel_dep(name = "child_workspace")
+local_path_override(
+    module_name = "child_workspace",
+    path = "child",
+)
+
+bazel_dep(name = "bazel_lib", version = "3.2.2")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_nodejs", version = "6.7.3")
+
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
+use_repo(node, "nodejs_toolchains")

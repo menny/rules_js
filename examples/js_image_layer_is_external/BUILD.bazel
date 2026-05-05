@@ -1,0 +1,10 @@
+# Run from here to trigger the bug:
+#   bazel build @child_workspace//:layer
+#
+# When js_image_layer is built from this outer workspace, files owned by child_workspace
+# have f.owner.repo_name == "child_workspace" (non-empty), so is_external is set to true.
+# Locally this succeeds because sandbox symlinks resolve. On remote execution the symlink
+# at bazel-out/.../bin/external/child_workspace/node_modules/... does not exist, and tar
+# fails with ENOENT.
+#
+# See: https://github.com/aspect-build/rules_js/issues/2824

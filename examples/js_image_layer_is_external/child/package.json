@@ -1,0 +1,9 @@
+{
+    "name": "child_workspace",
+    "dependencies": {
+        "acorn": "^8.7.1"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": []
+    }
+}

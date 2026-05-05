@@ -1,0 +1,2 @@
+# child is a separate bzlmod workspace; reference it as @child_workspace//:layer
+child
